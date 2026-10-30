@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>متتبع العادات</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3efe6;--card:#fffdf8;--ink:#1d2b2a;--mut:#6b7775;--line:#e2dccd;--acc:#0f766e;--acc2:#d99a1e;--ok:#0f766e;--bad:#b4432f;--heat0:#e6e0d1;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10181c;--card:#18242a;--ink:#eae6da;--mut:#93a3a2;--line:#27373d;--acc:#34c3b1;--acc2:#f0b84a;--ok:#34c3b1;--bad:#f08a72;--heat0:#243238}}
+:root[data-theme="dark"]{--bg:#10181c;--card:#18242a;--ink:#eae6da;--mut:#93a3a2;--line:#27373d;--acc:#34c3b1;--acc2:#f0b84a;--ok:#34c3b1;--bad:#f08a72;--heat0:#243238}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Cairo',system-ui,sans-serif;line-height:1.5}
+#app{max-width:640px;margin:0 auto;padding:16px}
+h1{font-size:1.5rem;font-weight:800;margin:0}h2{font-size:1.05rem;margin:0 0 10px;font-weight:800}
+.sub{color:var(--mut);font-size:.85rem}
+.bar{display:flex;gap:8px;justify-content:space-between;align-items:flex-start;flex-wrap:wrap}
+button,input,select{font:inherit;color:inherit}
+.btn{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:6px 12px;cursor:pointer}
+.btn:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.btn.p{background:var(--acc);border-color:var(--acc);color:#fff;font-weight:600}
+.btn:disabled{opacity:.4;cursor:default}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:12px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
+.stat b{display:block;font-size:1.6rem;font-weight:800}.stat span{font-size:.8rem;color:var(--mut)}
+.prog{height:10px;background:var(--heat0);border-radius:6px;overflow:hidden;margin-top:8px}
+.prog i{display:block;height:100%;background:var(--acc);transition:width .3s}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:8px}
+.day{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:6px 0;text-align:center;cursor:pointer;font-size:.8rem}
+.day b{display:block;font-size:1.05rem}.day.sel{border:2px solid var(--acc)}.day.full{background:var(--acc);color:#fff}.day.fz{background:var(--acc2);color:#222}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:2px 0}
+.chip{white-space:nowrap;border:1px solid var(--line);background:var(--card);border-radius:20px;padding:4px 12px;cursor:pointer;font-size:.85rem}
+.chip.on{background:var(--acc);color:#fff;border-color:var(--acc)}
+input[type=text],input[type=number],input[type=time],select{width:100%;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-top:6px}
+textarea{width:100%;min-height:80px;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:8px;margin-top:6px;direction:ltr;font-size:.75rem}
+.row{padding:12px 0;border-bottom:1px solid var(--line)}.row:last-child{border:0}
+.top{display:flex;gap:10px;align-items:center}
+.ck{width:30px;height:30px;border-radius:9px;border:2px solid var(--acc);background:transparent;cursor:pointer;flex:none;font-size:1rem;color:#fff;line-height:1}
+.ck.on{background:var(--acc)}
+.nm{flex:1;font-weight:600}.nm.d{text-decoration:line-through;color:var(--mut)}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin:6px 40px 0 0;font-size:.75rem}
+[dir=ltr] .tags{margin:6px 0 0 40px}
+.tag{background:var(--heat0);border-radius:12px;padding:1px 9px}.tag.f{background:var(--acc2);color:#222}
+.acts{display:flex;gap:4px;flex-wrap:wrap;margin:8px 40px 0 0}[dir=ltr] .acts{margin:8px 0 0 40px}
+.acts .btn{padding:2px 9px;font-size:.78rem}
+.sm{margin:8px 40px 0 0;display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:.8rem}[dir=ltr] .sm{margin:8px 0 0 40px}
+.sm input{margin:0;width:90px;padding:4px 8px}.sm input.w{width:100%;flex:1 1 100%}
+.days{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
+.heat{display:grid;grid-template-rows:repeat(7,1fr);grid-auto-flow:column;gap:3px;direction:ltr}
+.heat i{aspect-ratio:1;border-radius:3px;background:var(--heat0)}
+.badge{display:inline-block;background:var(--acc2);color:#222;border-radius:12px;padding:1px 10px;font-size:.78rem;margin:2px}
+.mrow{display:flex;justify-content:space-between;font-size:.88rem;margin-top:8px}
+#toast{position:fixed;bottom:calc(16px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 16px;border-radius:20px;display:none;z-index:9;max-width:90%}
+.frz{background:var(--acc2);color:#222;border-radius:10px;padding:6px 10px;margin-top:10px;font-size:.85rem}
+</style>
+</head>
+<body>
+<div id="app">
+ <div class="bar">
+  <div><h1 id="ttl"></h1><div class="sub" id="dt"></div></div>
+  <div style="display:flex;gap:6px;flex-wrap:wrap">
+   <button class="btn" data-a="lang"></button><button class="btn" data-a="theme" id="bth"></button><button class="btn" data-a="sound" id="bsn"></button><button class="btn" data-a="notif" id="bnt"></button>
+  </div>
+ </div>
+ <div id="top"></div>
+ <div id="nudge"></div>
+ <div class="chips" id="cats" style="margin-top:12px"></div>
+ <input type="text" id="q" placeholder="">
+ <div class="card" id="list" style="padding:4px 14px"></div>
+
+ <div class="card">
+  <h2 id="tAdd"></h2>
+  <input type="text" id="fn"><input type="text" id="fo">
+  <select id="fc"></select>
+  <div class="days" id="fd"></div>
+  <div style="display:flex;gap:8px;margin-top:2px;flex-wrap:wrap">
+   <label class="sub" style="flex:1;min-width:120px"><span id="lTime"></span><input type="time" id="ft"></label>
+   <label class="sub" style="flex:1;min-width:120px"><span id="lTmr"></span><input type="number" id="fm" min="0" placeholder="15"></label>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+   <label class="sub" style="flex:1;min-width:120px"><span id="lBt"></span><input type="number" id="fbt" min="0"></label>
+   <label class="sub" style="flex:1;min-width:120px"><span id="lBc"></span><input type="number" id="fbc" min="0"></label>
+  </div>
+  <button class="btn p" style="width:100%;margin-top:12px;padding:10px" data-a="addh" id="bAdd"></button>
+ </div>
+
+ <div class="card" id="wcard"><h2 id="tWd"></h2>
+  <input type="text" id="fw" dir="ltr"><input type="text" id="fmn"><input type="text" id="fex" dir="ltr">
+  <button class="btn p" style="width:100%;margin-top:10px" data-a="addw" id="bAw"></button>
+  <div id="wl"></div></div>
+ <div class="card" id="rcard"><h2 id="tR"></h2><div style="display:flex;gap:8px"><input type="number" id="fbp" min="0" style="width:90px;flex:none"><input type="text" id="fbq" dir="auto"></div><button class="btn p" style="width:100%;margin-top:10px" data-a="addbn" id="bAbn"></button><div id="rl"></div></div>
+ <div class="card" id="jcard"><h2 id="tJ"></h2><div id="jl"></div></div>
+ <div class="card" id="stats"></div>
+
+ <div class="card">
+  <h2 id="tBk"></h2>
+  <div style="display:flex;gap:8px"><button class="btn" data-a="exp" id="bExp"></button><button class="btn" data-a="imp" id="bImp"></button></div>
+  <textarea id="bk" spellcheck="false"></textarea>
+  <div class="sub" id="auto"></div>
+ </div>
+</div>
+<div id="toast"></div>
+<script>
+const L={ar:{dir:'rtl',title:'🌱 متتبع العادات',done:'أُنجز',total:'العادات',best:'أفضل سلسلة',of:'من',all:'الكل',search:'ابحث في عادات اليوم…',empty:'لا عادات لهذا اليوم. أضف عادة جديدة بالأسفل.',add:'إضافة عادة جديدة',name:'اسم العادة',note:'ملاحظة أو وقت (اختياري)',time:'وقت التذكير',tmr:'مؤقت (دقائق)',bt:'كتاب: عدد الصفحات الكلي',bc:'كتاب: الصفحة الحالية',addb:'+ أضف العادة',days:'أيام العادة',rest:'يوم راحة',restOn:'هذا اليوم راحة: لا يكسر السلسلة',restUsed:'استخدمت يوم الراحة هذا الأسبوع',archive:'أرشفة',del:'حذف',sure:'تأكيد الحذف؟',restore:'استعادة',start:'ابدأ',stop:'إيقاف',pages:'الصفحة الحالية',plus:'حفظ',journal:'ملاحظة اليوم: ماذا تعلمت؟',stat:'الإحصائيات',month:'التزام هذا الشهر',bestd:'أفضل يوم',worst:'أضعف يوم',heat:'خريطة الانتظام (12 أسبوعاً)',badges:'الشارات',arch:'المؤرشفة',bk:'نسخ احتياطي',exp:'تصدير',imp:'استيراد',auto:'يُحفظ كل شيء تلقائياً في هذا المتصفح. انسخ النص أعلاه للاحتفاظ بنسخة خارجية.',nobadge:'أكمل 7 أيام متتالية لأول شارة',eta:'الانتهاء المتوقع بعد',day:'يوم',days_:'أيام',left:'متبقٍ',done_t:'أحسنت! اكتملت العادة',tdone:'انتهى المؤقت',remind:'حان وقت',future:'لا يمكن تسجيل يوم قادم',imported:'تم الاستيراد',bad:'نص غير صالح',dn:['أحد','اثنين','ثلاثاء','أربعاء','خميس','جمعة','سبت'],cats:['روحي','تعلّم','صحة','عمل','عام'],wk:'الأسبوع',prev:'‹',next:'›',lang:'English',on:'مفعّل',off:'متوقف',edit:'تعديل',savech:'حفظ التعديلات',tpl:'قوالب سريعة للمختبر',tw:'كلمة اليوم بالإنجليزية',word:'الكلمة بالإنجليزية',mean:'المعنى',exm:'جملة مثال (اختياري)',addw:'+ احفظ الكلمة',rev:'مراجعة',show:'أظهر المعنى',nxt:'التالية',nw:'لم تحفظ كلمات بعد',wtot:'كلمات محفوظة',wr:'تقرير آخر 7 أيام',wrate:'نسبة الإنجاز',wfull:'أيام مكتملة',wbh:'أفضل عادة',wmh:'تحتاج اهتماماً',wwd:'كلمات جديدة',vsp:'عن الأسبوع السابق',bname:'اسم الكتاب الذي تقرأه',tr:'القراءة وملاحظات الكتاب',nobook:'لا توجد عادة كتاب بعد',bq:'اقتباس أو فكرة من الكتاب',bp:'ص ',pg:'الصفحة',addbn:'+ أضف الملاحظة',fin:'كتب أنهيتها',nof:'لم تنهِ أي كتاب بعد',fbt:'انتهى الكتاب! أُضيف إلى سجلك',ok:'عرفتها',no:'أخطأت',caught:'انتهت مراجعة اليوم',due:'مستحقة للمراجعة',tj:'سجل الملاحظات اليومية',nj:'لا ملاحظات بعد. اكتب في خانة الملاحظة تحت أي عادة.',more:'عرض الأقدم',bkn:'مرّ أكثر من أسبوع على آخر نسخة احتياطية'},
+en:{dir:'ltr',title:'🌱 Habit Tracker',done:'Done',total:'Habits',best:'Best streak',of:'of',all:'All',search:'Search habits…',empty:'No habits for this day. Add one below.',add:'Add a new habit',name:'Habit name',note:'Note or time (optional)',time:'Reminder time',tmr:'Timer (minutes)',bt:'Book: total pages',bc:'Book: current page',addb:'+ Add habit',days:'Habit days',rest:'Rest day',restOn:'Rest day: streaks stay safe',restUsed:'Rest day already used this week',archive:'Archive',del:'Delete',sure:'Confirm delete?',restore:'Restore',start:'Start',stop:'Stop',pages:'Current page',plus:'Save',journal:'Today’s note: what did you learn?',stat:'Statistics',month:'This month',bestd:'Best day',worst:'Weakest day',heat:'Consistency (12 weeks)',badges:'Badges',arch:'Archived',bk:'Backup',exp:'Export',imp:'Import',auto:'Everything saves automatically in this browser. Copy the text above for an external backup.',nobadge:'Complete 7 days in a row for your first badge',eta:'Estimated finish in',day:'day',days_:'days',left:'left',done_t:'Well done! Habit completed',tdone:'Timer finished',remind:'Time for',future:'Cannot log a future day',imported:'Imported',bad:'Invalid text',dn:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],cats:['Spiritual','Learning','Health','Work','General'],wk:'Week',prev:'‹',next:'›',lang:'العربية',on:'On',off:'Off',edit:'Edit',savech:'Save changes',tpl:'Quick lab templates',tw:'Word of the day',word:'English word',mean:'Meaning',exm:'Example sentence (optional)',addw:'+ Save word',rev:'Review',show:'Show meaning',nxt:'Next',nw:'No words saved yet',wtot:'Words saved',wr:'Last 7 days report',wrate:'Completion rate',wfull:'Perfect days',wbh:'Best habit',wmh:'Needs attention',wwd:'New words',vsp:'vs previous week',bname:'Title of the book you are reading',tr:'Reading & book notes',nobook:'No book habit yet',bq:'Quote or idea from the book',bp:'p. ',pg:'Page',addbn:'+ Add note',fin:'Books finished',nof:'No finished books yet',fbt:'Book finished! Added to your log',ok:'Knew it',no:'Missed',caught:'Review done for today',due:'due for review',tj:'Daily notes log',nj:'No notes yet. Write in the note box under any habit.',more:'Show older',bkn:'It has been over a week since your last backup'}};
+const K='habit_tracker_v2';
+const z=n=>String(n).padStart(2,'0');
+const dk=d=>d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate());
+const pd=k=>{const[a,b,c]=k.split('-').map(Number);return new Date(a,b-1,c)};
+const ad=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ALL=[0,1,2,3,4,5,6],TODAY=()=>dk(new Date());
+const TPL=[{ar:'مراجعة مصطلحات الكيمياء التحليلية',en:'Review analytical chemistry terms',cat:1,timer:10,days:ALL},{ar:'مراجعة مصطلحات النفط والغاز بالإنجليزية',en:'Review oil & gas terms in English',cat:1,timer:10,days:ALL},{ar:'قراءة قسم من إجراءات التشغيل (SOP)',en:'Read one SOP section',cat:3,days:[0,1,2,3,4]},{ar:'قراءة مقال تقني',en:'Read a technical article',cat:3,days:[1,3]}];
+let S=load(),sel=TODAY(),cat='all',q='',wk=0,T=null,delId=null,fdays=[...ALL],notified={},rv=null,editId=null,jr=0;
+function load(){try{const r=JSON.parse(localStorage.getItem(K));if(r&&r.habits){if(!r.v3){r.v3=1;r.lang='en';const nm={1:'Quran',2:'English 15 min',3:'20 pages of any book'};r.habits.forEach(h=>{if(nm[h.id]&&/[\u0600-\u06FF]/.test(h.name))h.name=nm[h.id]})}return r}}catch(e){}
+ const t=TODAY();return{v3:1,lang:'en',theme:'',sound:true,notif:false,logs:{},freeze:{},notes:{},habits:[
+ {id:1,name:'Quran',cat:0,days:ALL,created:t,time:'',note:'',archived:false},
+ {id:2,name:'English 15 min',cat:1,days:ALL,created:t,time:'',note:'',timer:15,archived:false},
+ {id:3,name:'20 pages of any book',cat:1,days:ALL,created:t,time:'',note:'كتاب الداء والدواء',book:{total:300,cur:40,start:40},archived:false}]}}
+let cloud=null,ctm=null;
+function save(){S.ts=Date.now();try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}if(cloud){clearTimeout(ctm);ctm=setTimeout(()=>{cloud.set({json:JSON.stringify(S)}).catch(()=>{})},800)}}
+async function initCloud(){try{const db=await claude.use('db'),us=await claude.use('user');if(!db||!us)return;const id=await us.id();const ref=db.collection('data/users/'+id).doc('tracker');const snap=await ref.get();cloud=ref;if(snap.exists){const r=JSON.parse(snap.data().json);if(r&&r.habits&&(r.ts||0)>(S.ts||0)){S=r;S.words=S.words||[];S.books=S.books||[];S.bnotes=S.bnotes||[];try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}render()}else save()}else save()}catch(e){}}
+const t=k=>L[S.lang][k];
+const sched=(h,d)=>h.days.includes(d.getDay())&&dk(d)>=h.created;
+const isDone=(h,k)=>!!(S.logs[k]&&S.logs[k][h.id]);
+function streak(h){let d=new Date();if(sched(h,d)&&!isDone(h,dk(d)))d=ad(d,-1);let n=0;
+ for(let i=0;i<800;i++){const k=dk(d);if(k<h.created)break;
+  if(S.freeze[k]||!h.days.includes(d.getDay())){d=ad(d,-1);continue}
+  if(isDone(h,k)){n++;d=ad(d,-1)}else break}return n}
+function toast(m){const e=document.getElementById('toast');e.textContent=m;e.style.display='block';clearTimeout(toast.x);toast.x=setTimeout(()=>e.style.display='none',2600)}
+function beep(){if(!S.sound)return;try{const c=new (window.AudioContext||window.webkitAudioContext)(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=740;g.gain.value=.08;o.start();o.stop(c.currentTime+.18)}catch(e){}}
+function weekStart(){const b=ad(new Date(),wk*7);return ad(b,-b.getDay())}
+function setDone(h,k,v){if(k>TODAY()){toast(t('future'));return}S.logs[k]=S.logs[k]||{};if(v){S.logs[k][h.id]=1;beep()}else delete S.logs[k][h.id]}
+
+function render(){
+ const R=document.documentElement;R.lang=S.lang;R.dir=t('dir');if(S.theme)R.setAttribute('data-theme',S.theme);else R.removeAttribute('data-theme');
+ document.getElementById('ttl').textContent=t('title');
+ document.getElementById('dt').textContent=pd(sel).toLocaleDateString(S.lang==='ar'?'ar-IQ':'en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+ document.querySelector('[data-a=lang]').textContent=t('lang');
+ document.getElementById('bth').textContent=(R.getAttribute('data-theme')==='dark'?'☀️':'🌙');
+ document.getElementById('bsn').textContent=S.sound?'🔔':'🔕';
+ document.getElementById('bnt').textContent=S.notif?'⏰ '+t('on'):'⏰ '+t('off');
+ document.getElementById('q').placeholder=t('search');
+ const tx={tAdd:'add',lTime:'time',lTmr:'tmr',lBt:'bt',lBc:'bc',bAdd:'addb',tBk:'bk',bExp:'exp',bImp:'imp',auto:'auto'};
+ for(const id in tx)document.getElementById(id).textContent=t(tx[id]);
+ document.getElementById('fn').placeholder=t('name');document.getElementById('fo').placeholder=t('note');
+ {const fc=document.getElementById('fc'),cv=fc.value;fc.innerHTML=t('cats').map((c,i)=>`<option value="${i}">${esc(c)}</option>`).join('');fc.value=cv||0}
+ document.getElementById('fd').innerHTML=t('dn').map((n,i)=>`<button class="chip ${fdays.includes(i)?'on':''}" data-a="fday" data-i="${i}">${n}</button>`).join('');
+ document.getElementById('cats').innerHTML=[`<button class="chip ${cat==='all'?'on':''}" data-a="cat" data-c="all">${t('all')}</button>`].concat(t('cats').map((c,i)=>`<button class="chip ${cat===i?'on':''}" data-a="cat" data-c="${i}">${esc(c)}</button>`)).join('');
+ renderTop();renderList();renderStats();renderMore();
+}
+function vis(){const d=pd(sel);return S.habits.filter(h=>!h.archived&&sched(h,d))}
+function renderTop(){
+ const v=vis(),dn=v.filter(h=>isDone(h,sel)).length,act=S.habits.filter(h=>!h.archived),best=Math.max(0,...act.map(streak));
+ const pct=v.length?Math.round(dn/v.length*100):0;
+ const ws=weekStart();let strip='';
+ for(let i=0;i<7;i++){const d=ad(ws,i),k=dk(d),hs=S.habits.filter(h=>!h.archived&&sched(h,d));
+  const full=hs.length&&hs.every(h=>isDone(h,k));
+  strip+=`<button class="day ${k===sel?'sel':''} ${S.freeze[k]?'fz':full?'full':''}" data-a="pick" data-k="${k}">${t('dn')[i]}<b>${d.getDate()}</b></button>`}
+ const wkKeys=[...Array(7)].map((_,i)=>dk(ad(ws,i))),usedOther=wkKeys.some(k=>S.freeze[k]&&k!==sel);
+ document.getElementById('top').innerHTML=`
+ <div class="stats"><div class="stat"><b>${dn}</b><span>${t('done')}</span></div><div class="stat"><b>${act.length}</b><span>${t('total')}</span></div><div class="stat"><b>🔥 ${best}</b><span>${t('best')}</span></div></div>
+ <div class="card" style="padding:10px 14px"><div class="mrow" style="margin:0"><b>${dn} ${t('of')} ${v.length}</b><b>${pct}%</b></div><div class="prog"><i style="width:${pct}%"></i></div></div>
+ <div style="display:flex;gap:6px;margin-top:12px;align-items:center"><button class="btn" data-a="wk" data-d="-1">${t('prev')}</button><div class="week" style="flex:1;margin:0">${strip}</div><button class="btn" data-a="wk" data-d="1" ${wk>=0?'disabled':''}>${t('next')}</button></div>
+ <div style="margin-top:8px"><button class="btn" data-a="frz" ${usedOther?'disabled':''}>🛌 ${t('rest')}</button> <span class="sub">${usedOther?t('restUsed'):''}</span></div>
+ ${S.freeze[sel]?`<div class="frz">${t('restOn')}</div>`:''}`}
+function renderList(){
+ const ql=q.trim().toLowerCase(),v=vis().filter(h=>(cat==='all'||h.cat===cat)&&(!ql||h.name.toLowerCase().includes(ql)));
+ const el=document.getElementById('list');
+ if(!v.length){el.innerHTML=`<div class="sub" style="padding:18px 0">${t('empty')}</div>`;return}
+ el.innerHTML=v.map(h=>{const d=isDone(h,sel),st=streak(h),nt=(S.notes[sel]||{})[h.id]||'';let ex='';
+  if(h.book){const b=h.book,p=Math.min(100,Math.round(b.cur/Math.max(1,b.total)*100)),el_=Math.max(1,Math.round((new Date()-pd(h.created))/864e5)+1),got=b.cur-b.start,rate=got/el_,rem=b.total-b.cur;
+   const eta=rate>0&&rem>0?Math.ceil(rem/rate):null;
+   ex+=`<div class="sm" style="display:block"><input type="text" class="w" dir="auto" placeholder="${esc(t('bname'))}" value="${esc(b.title!==undefined?b.title:(h.note||''))}" data-a="btitle" data-id="${h.id}" style="width:100%;margin:0 0 8px;font-weight:600"><div class="mrow" style="margin:0"><span>📖 ${b.cur} / <input type="number" style="width:70px;display:inline" value="${b.total}" data-a="btot" data-id="${h.id}"> (${p}%)</span><span>${rem} ${t('left')}</span></div><div class="prog"><i style="width:${p}%"></i></div>${eta?`<div class="sub">${t('eta')} ≈ ${eta} ${eta===1?t('day'):t('days_')}</div>`:''}</div>
+   <div class="sm"><span>${t('pages')}</span><input type="number" min="0" id="pg${h.id}" placeholder="${b.cur}"><button class="btn" data-a="pages" data-id="${h.id}">${t('plus')}</button></div>`}
+  if(h.timer){const run=T&&T.id===h.id;ex+=`<div class="sm"><button class="btn" data-a="tmr" data-id="${h.id}">⏱ ${run?t('stop'):t('start')} ${h.timer}′</button><b id="tm${h.id}">${run?fmt(T.end-Date.now()):''}</b></div>`}
+  ex+=`<div class="sm"><input type="text" class="w" placeholder="${esc(t('journal'))}" value="${esc(nt)}" data-a="note" data-id="${h.id}"></div>`;
+  return `<div class="row"><div class="top"><button class="ck ${d?'on':''}" data-a="tog" data-id="${h.id}" aria-label="done">${d?'✓':''}</button><div class="nm ${d?'d':''}">${esc(h.name)}</div></div>
+  <div class="tags"><span class="tag">${esc(t('cats')[h.cat]||'')}</span><span class="tag f">🔥 ${st} ${st===1?t('day'):t('days_')}</span>${h.time?`<span class="tag">⏰ ${h.time}</span>`:''}${h.note?`<span class="tag">${esc(h.note)}</span>`:''}</div>
+  ${ex}<div class="acts"><button class="btn" data-a="edit" data-id="${h.id}">✏️ ${t('edit')}</button><button class="btn" data-a="arc" data-id="${h.id}">📦 ${t('archive')}</button><button class="btn" data-a="del" data-id="${h.id}" style="color:var(--bad)">🗑 ${delId===h.id?t('sure'):t('del')}</button></div></div>`}).join('')}
+function fmt(ms){ms=Math.max(0,ms);return z(Math.floor(ms/60000))+':'+z(Math.floor(ms/1000)%60)}
+function renderStats(){
+ const act=S.habits.filter(h=>!h.archived),now=new Date(),y=now.getFullYear(),m=now.getMonth();
+ let mr='',bd=[0,0,0,0,0,0,0],bs=[0,0,0,0,0,0,0];
+ act.forEach(h=>{let s=0,n=0;for(let d=new Date(y,m,1);d<=now;d=ad(d,1)){const k=dk(d);if(!sched(h,d)||S.freeze[k])continue;n++;if(isDone(h,k))s++}
+  mr+=`<div class="mrow"><span>${esc(h.name)}</span><b>${n?Math.round(s/n*100):0}%</b></div><div class="prog" style="margin-top:3px"><i style="width:${n?s/n*100:0}%"></i></div>`});
+ for(let i=0;i<90;i++){const d=ad(now,-i),k=dk(d);if(S.freeze[k])continue;act.forEach(h=>{if(sched(h,d)){bs[d.getDay()]++;if(isDone(h,k))bd[d.getDay()]++}})}
+ const rt=bd.map((v,i)=>bs[i]?v/bs[i]:-1),valid=rt.map((r,i)=>[r,i]).filter(a=>a[0]>=0).sort((a,b)=>b[0]-a[0]);
+ const bestD=valid[0],worstD=valid[valid.length-1];
+ const wrp=weekly(act);const end=ad(now,6-now.getDay());let hm='';
+ for(let i=83;i>=0;i--){const d=ad(end,-i),k=dk(d);let c=null;if(k<=TODAY()){const hs=act.filter(h=>sched(h,d));if(hs.length){const r=hs.filter(h=>isDone(h,k)).length/hs.length;c=r}}
+  hm+=`<i title="${k}" style="${c===null?'':`background:color-mix(in srgb,var(--acc) ${Math.round(15+c*85)}%,var(--heat0))`}"></i>`}
+ const mx=Math.max(0,...act.map(streak)),bg=[7,30,100].filter(n=>mx>=n).map(n=>`<span class="badge">🏅 ${n} ${t('days_')}</span>`).join('')||`<span class="sub">${t('nobadge')}</span>`;
+ const ar=S.habits.filter(h=>h.archived).map(h=>`<div class="mrow"><span>${esc(h.name)}</span><button class="btn" data-a="rst" data-id="${h.id}">${t('restore')}</button></div>`).join('');
+ document.getElementById('stats').innerHTML=`<h2>${t('stat')}</h2>${wrp}<div class="sub">${t('month')}</div>${mr}
+ ${bestD?`<div class="mrow" style="margin-top:14px"><span>${t('bestd')}: <b>${t('dn')[bestD[1]]}</b> (${Math.round(bestD[0]*100)}%)</span><span>${t('worst')}: <b>${t('dn')[worstD[1]]}</b> (${Math.round(worstD[0]*100)}%)</span></div>`:''}
+ <div class="sub" style="margin-top:14px">${t('heat')}</div><div class="heat" style="margin-top:6px">${hm}</div>
+ <div class="sub" style="margin-top:14px">${t('badges')}</div><div>${bg}</div>
+ ${ar?`<div class="sub" style="margin-top:14px">${t('arch')}</div>${ar}`:''}`}
+
+document.addEventListener('click',e=>{
+ const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a,id=+b.dataset.id,h=S.habits.find(x=>x.id===id);
+ if(a==='tog'){setDone(h,sel,!isDone(h,sel));if(isDone(h,sel))toast(t('done_t'))}
+ else if(a==='pick'){sel=b.dataset.k}
+ else if(a==='wk'){wk=Math.min(0,wk+ +b.dataset.d)}
+ else if(a==='cat'){cat=b.dataset.c==='all'?'all':+b.dataset.c}
+ else if(a==='frz'){if(S.freeze[sel])delete S.freeze[sel];else S.freeze[sel]=1}
+ else if(a==='arc'){h.archived=true}
+ else if(a==='rst'){h.archived=false}
+ else if(a==='del'){if(delId===id){S.habits=S.habits.filter(x=>x.id!==id);delId=null}else{delId=id;save();renderList();return}}
+ else if(a==='pages'){const n=+document.getElementById('pg'+id).value;if(n>0){const old=h.book.cur;h.book.cur=Math.min(h.book.total,n);if(h.book.cur>old&&sel<=TODAY()){setDone(h,sel,true)}if(h.book.cur>=h.book.total)finishBook(h)}}
+ else if(a==='tmr'){if(T&&T.id===id)T=null;else T={id,end:Date.now()+h.timer*60000,k:sel}}
+ else if(a==='lang'){S.lang=S.lang==='ar'?'en':'ar'}
+ else if(a==='theme'){const cur=document.documentElement.getAttribute('data-theme');S.theme=cur==='dark'?'light':'dark'}
+ else if(a==='sound'){S.sound=!S.sound}
+ else if(a==='notif'){S.notif=!S.notif;if(S.notif){try{Notification.requestPermission()}catch(x){}}}
+ else if(a==='edit'){editId=id;document.getElementById('fn').value=h.name;document.getElementById('fo').value=h.note||'';fdays=[...h.days];render();document.getElementById('fc').value=h.cat;document.getElementById('ft').value=h.time||'';document.getElementById('fm').value=h.timer||'';document.getElementById('fbt').value=h.book?h.book.total:'';document.getElementById('fbc').value=h.book?h.book.cur:'';document.getElementById('fn').scrollIntoView({behavior:'smooth',block:'center'});document.getElementById('fn').focus();return}
+ else if(a==='tpl'){const p=TPL[+b.dataset.i];const nh={id:Date.now(),name:p[S.lang],cat:p.cat,days:[...p.days],created:TODAY(),time:'',note:'',archived:false};if(p.timer)nh.timer=p.timer;S.habits.push(nh);toast('✓ '+nh.name)}
+ else if(a==='addw'){const w=document.getElementById('fw').value.trim(),m=document.getElementById('fmn').value.trim();if(!w||!m){document.getElementById('fw').focus();return}S.words.push({w,m,e:document.getElementById('fex').value.trim(),t:Date.now(),d:TODAY(),box:0,due:TODAY()});['fw','fmn','fex'].forEach(i=>document.getElementById(i).value='')}
+ else if(a==='rev'){const d=TODAY(),du=S.words.filter(w=>(w.due||w.d)<=d);if(!du.length){toast(t('caught'));return}rv={t:du[Math.floor(Math.random()*du.length)].t,s:0}}
+ else if(a==='ok'||a==='no'){const w=S.words.find(x=>x.t===rv.t);if(w){const bx=a==='ok'?Math.min(4,(w.box||0)+1):0;w.box=bx;w.due=dk(ad(new Date(),a==='ok'?[1,2,4,8,16][bx]:0))}const d=TODAY(),du=S.words.filter(x=>(x.due||x.d)<=d&&x.t!==rv.t);if(du.length){rv={t:du[Math.floor(Math.random()*du.length)].t,s:0}}else{rv=null;toast(t('caught'))}}
+ else if(a==='say'){say(b.dataset.w);return}
+ else if(a==='addbn'){const h2=S.habits.find(x=>x.book&&!x.archived);const tx=document.getElementById('fbq').value.trim();if(!h2||!tx){document.getElementById('fbq').focus();return}S.bnotes.push({t:Date.now(),k:bookTitle(h2),p:+document.getElementById('fbp').value||0,x:tx,d:TODAY()});document.getElementById('fbq').value='';document.getElementById('fbp').value=''}
+ else if(a==='delbn'){S.bnotes=S.bnotes.filter(x=>x.t!==+b.dataset.t)}
+ else if(a==='jmore'){jr=1}
+ else if(a==='shw'){rv.s=1}
+ else if(a==='delw'){S.words=S.words.filter(x=>x.t!==+b.dataset.t);rv=null}
+ else if(a==='fday'){const i=+b.dataset.i;fdays=fdays.includes(i)?fdays.filter(x=>x!==i):[...fdays,i];render();return}
+ else if(a==='addh'){addHabit();return}
+ else if(a==='exp'){S.lastExport=Date.now();document.getElementById('bk').value=JSON.stringify(S);save();render();document.getElementById('bk').scrollIntoView({behavior:'smooth',block:'center'});return}
+ else if(a==='imp'){try{const o=JSON.parse(document.getElementById('bk').value);if(!o.habits)throw 0;S=o;S.words=S.words||[];S.books=S.books||[];S.bnotes=S.bnotes||[];save();toast(t('imported'))}catch(x){toast(t('bad'));return}}
+ else return;
+ delId=a==='del'?delId:null;save();render()});
+document.addEventListener('change',e=>{const b=e.target.closest('[data-a]');if(!b)return;const id=+b.dataset.id,h=S.habits.find(x=>x.id===id);
+ if(b.dataset.a==='note'){S.notes[sel]=S.notes[sel]||{};S.notes[sel][id]=b.value;save()}
+ if(b.dataset.a==='btitle'){const o=bookTitle(h);h.book.title=b.value.trim();S.bnotes.forEach(n=>{if(n.k===o)n.k=h.book.title});save();render()}
+ if(b.dataset.a==='btot'){h.book.total=Math.max(1,+b.value||1);save();renderList()}});
+document.getElementById('q').addEventListener('input',e=>{q=e.target.value;renderList()});
+function addHabit(){const n=document.getElementById('fn').value.trim();if(!n||!fdays.length){document.getElementById('fn').focus();return}
+ const h={id:Date.now(),name:n,cat:+document.getElementById('fc').value,days:[...fdays],created:TODAY(),time:document.getElementById('ft').value,note:document.getElementById('fo').value.trim(),archived:false};
+ const tm=+document.getElementById('fm').value,bt=+document.getElementById('fbt').value,bc=+document.getElementById('fbc').value||0;
+ if(tm>0)h.timer=tm;if(bt>0)h.book={total:bt,cur:bc,start:bc};
+ if(editId){const o=S.habits.find(x=>x.id===editId);if(o){o.name=h.name;o.cat=h.cat;o.days=h.days;o.time=h.time;o.note=h.note;if(h.timer)o.timer=h.timer;else delete o.timer;if(h.book)o.book=Object.assign({},o.book,{total:h.book.total,cur:h.book.cur,start:o.book?o.book.start:h.book.cur});else delete o.book}editId=null}else S.habits.push(h);['fn','fo','ft','fm','fbt','fbc'].forEach(i=>document.getElementById(i).value='');save();render()}
+setInterval(()=>{
+ if(T){const left=T.end-Date.now(),el=document.getElementById('tm'+T.id);if(left<=0){const h=S.habits.find(x=>x.id===T.id);if(h&&T.k<=TODAY())setDone(h,T.k,true);T=null;save();toast(t('tdone'));render()}else if(el)el.textContent=fmt(left)}
+},1000);
+setInterval(()=>{if(!S.notif)return;const n=new Date(),hm=z(n.getHours())+':'+z(n.getMinutes()),k=TODAY();
+ S.habits.forEach(h=>{if(!h.archived&&h.time===hm&&sched(h,n)&&!isDone(h,k)&&notified[h.id+k+hm]!==1){notified[h.id+k+hm]=1;toast('⏰ '+t('remind')+' '+h.name);beep();try{if(Notification.permission==='granted')new Notification(h.name)}catch(e){}}})},20000);
+function bookTitle(h){return h.book.title!==undefined?h.book.title:(h.note||'')}
+function say(w){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(w);u.lang='en-US';u.rate=.85;speechSynthesis.speak(u)}catch(e){}}
+function finishBook(h){const b=h.book;S.books.push({title:bookTitle(h),total:b.total,start:b.began||h.created,end:TODAY()});h.book={total:b.total,cur:0,start:0,began:TODAY(),title:''};toast(t('fbt'))}
+function renderMore(){
+ document.getElementById('bAdd').textContent=editId?t('savech'):t('addb');
+ document.getElementById('tWd').textContent=t('tw');
+ [['fw','word'],['fmn','mean'],['fex','exm']].forEach(p=>{document.getElementById(p[0]).placeholder=t(p[1])});
+ document.getElementById('bAw').textContent=t('addw');
+ const td=TODAY(),W=S.words||[],due=W.filter(w=>(w.due||w.d)<=td).length,sp='speechSynthesis' in window;
+ let h=`<div class="mrow"><span>${t('wtot')}: <b>${W.length}</b> · ${due} ${t('due')}</span>${W.length?`<button class="btn" data-a="rev">${t('rev')}</button>`:''}</div>`;
+ const cw=rv&&W.find(x=>x.t===rv.t);
+ if(cw){h+=`<div class="card" style="text-align:center;background:var(--bg)"><div style="font-size:1.5rem;font-weight:800" dir="ltr">${esc(cw.w)} ${sp?`<button class="btn" data-a="say" data-w="${esc(cw.w)}">🔊</button>`:''}</div>${rv.s?`<div>${esc(cw.m)}</div>${cw.e?`<div class="sub" dir="ltr">${esc(cw.e)}</div>`:''}<div style="display:flex;gap:8px;justify-content:center;margin-top:8px"><button class="btn" data-a="no">${t('no')}</button><button class="btn p" data-a="ok">${t('ok')}</button></div>`:`<button class="btn" style="margin-top:8px" data-a="shw">${t('show')}</button>`}</div>`}
+ h+=W.length?W.slice(-8).reverse().map(w=>`<div class="mrow"><span><b dir="ltr">${esc(w.w)}</b> — ${esc(w.m)}</span><span>${sp?`<button class="btn" style="padding:0 8px" data-a="say" data-w="${esc(w.w)}">🔊</button> `:''}<button class="btn" style="padding:0 8px" data-a="delw" data-t="${w.t}">✕</button></span></div>`).join(''):`<div class="sub">${t('nw')}</div>`;
+ document.getElementById('wl').innerHTML=h;
+ document.getElementById('tR').textContent=t('tr');document.getElementById('fbq').placeholder=t('bq');document.getElementById('fbp').placeholder=t('pg');document.getElementById('bAbn').textContent=t('addbn');
+ const bh=S.habits.find(x=>x.book&&!x.archived);let r='';
+ if(!bh){r=`<div class="sub">${t('nobook')}</div>`}else{const k=bookTitle(bh),ns=S.bnotes.filter(n=>n.k===k).slice(-5).reverse();r=`<div class="mrow"><b>📖 ${esc(k||'—')}</b></div>`+ns.map(n=>`<div class="mrow"><span>${n.p?`<b>${t('bp')}${n.p}</b> `:''}${esc(n.x)}</span><button class="btn" style="padding:0 8px" data-a="delbn" data-t="${n.t}">✕</button></div>`).join('')}
+ r+=`<div class="sub" style="margin-top:14px">${t('fin')}: <b>${S.books.length}</b></div>`+(S.books.length?S.books.slice().reverse().map(b=>`<div class="mrow"><span>✅ ${esc(b.title||'—')}</span><span class="sub">${b.start} → ${b.end} (${Math.round((pd(b.end)-pd(b.start))/864e5)+1} ${t('days_')})</span></div>`).join(''):`<div class="sub">${t('nof')}</div>`);
+ document.getElementById('rl').innerHTML=r;
+ document.getElementById('tJ').textContent=t('tj');
+ const ds=Object.keys(S.notes).filter(d=>Object.values(S.notes[d]).some(x=>x&&x.trim())).sort().reverse();
+ let j=ds.slice(0,jr?ds.length:10).map(d=>`<div style="margin-top:10px"><b>${pd(d).toLocaleDateString(S.lang==='ar'?'ar-IQ':'en-US',{weekday:'short',month:'short',day:'numeric'})}</b>${Object.entries(S.notes[d]).filter(e=>e[1]&&e[1].trim()).map(e=>{const hh=S.habits.find(x=>x.id===+e[0]);return `<div class="mrow"><span><span class="tag">${esc(hh?hh.name:'—')}</span> ${esc(e[1])}</span></div>`}).join('')}</div>`).join('');
+ if(!ds.length)j=`<div class="sub">${t('nj')}</div>`;else if(ds.length>10&&!jr)j+=`<button class="btn" style="margin-top:10px" data-a="jmore">${t('more')}</button>`;
+ document.getElementById('jl').innerHTML=j;
+ const stale=Date.now()-(S.lastExport||S.created||Date.now())>7*864e5;
+ document.getElementById('nudge').innerHTML=stale?`<div class="frz" style="display:flex;justify-content:space-between;gap:8px;align-items:center"><span>${t('bkn')}</span><button class="btn" data-a="exp">${t('exp')}</button></div>`:'';
+}
+function renderMoreOld(){
+ document.getElementById('bAdd').textContent=editId?t('savech'):t('addb');
+ document.getElementById('tWd').textContent=t('tw');
+ document.getElementById('fw').placeholder=t('word');document.getElementById('fmn').placeholder=t('mean');document.getElementById('fex').placeholder=t('exm');
+ document.getElementById('bAw').textContent=t('addw');
+ const W=S.words||[];let h=`<div class="mrow"><span>${t('wtot')}: <b>${W.length}</b></span>${W.length?`<button class="btn" data-a="rev">${t('rev')}</button>`:''}</div>`;
+ if(rv&&W[rv.i]){const w=W[rv.i];h+=`<div class="card" style="text-align:center;background:var(--bg)"><div style="font-size:1.5rem;font-weight:800" dir="ltr">${esc(w.w)}</div>${rv.s?`<div>${esc(w.m)}</div>${w.e?`<div class="sub" dir="ltr">${esc(w.e)}</div>`:''}<button class="btn p" style="margin-top:8px" data-a="nxt">${t('nxt')}</button>`:`<button class="btn" style="margin-top:8px" data-a="shw">${t('show')}</button>`}</div>`}
+ h+=W.length?W.slice(-8).reverse().map(w=>`<div class="mrow"><span><b dir="ltr">${esc(w.w)}</b> — ${esc(w.m)}</span><button class="btn" style="padding:0 8px" data-a="delw" data-t="${w.t}">✕</button></div>`).join(''):`<div class="sub">${t('nw')}</div>`;
+ document.getElementById('wl').innerHTML=h}
+function weekly(act){
+ const now=new Date();const calc=off=>{let s=0,n=0,full=0,per={};for(let i=0;i<7;i++){const d=ad(now,-i-off*7),k=dk(d);if(S.freeze[k])continue;let ds=0,dn=0;act.forEach(h=>{if(sched(h,d)){n++;dn++;per[h.id]=per[h.id]||[0,0];per[h.id][1]++;if(isDone(h,k)){s++;ds++;per[h.id][0]++}}});if(dn&&ds===dn)full++}return{s,n,full,per}};
+ const c=calc(0),p=calc(1),r=c.n?Math.round(c.s/c.n*100):0,pr=p.n?Math.round(p.s/p.n*100):null;
+ const arr=act.filter(h=>c.per[h.id]).map(h=>({h,r:c.per[h.id][0]/c.per[h.id][1]})).sort((a,b)=>b.r-a.r);
+ const w7=dk(ad(now,-6)),nw=(S.words||[]).filter(w=>w.d>=w7).length;
+ const df=pr===null?'':` (${r-pr>=0?'+':''}${r-pr}% ${t('vsp')})`;
+ return `<div class="card" style="background:var(--bg);margin:0 0 14px"><b>${t('wr')}</b><div class="mrow"><span>${t('wrate')}</span><b>${r}%${df}</b></div><div class="mrow"><span>${t('wfull')}</span><b>${c.full}/7</b></div>${arr.length?`<div class="mrow"><span>${t('wbh')}</span><b>${esc(arr[0].h.name)}</b></div>`:''}${arr.length>1?`<div class="mrow"><span>${t('wmh')}</span><b>${esc(arr[arr.length-1].h.name)}</b></div>`:''}<div class="mrow"><span>${t('wwd')}</span><b>${nw}</b></div></div>`}
+S.words=S.words||[];S.books=S.books||[];S.bnotes=S.bnotes||[];S.created=S.created||Date.now();render();initCloud();
+</script>
+</body>
+</html>
